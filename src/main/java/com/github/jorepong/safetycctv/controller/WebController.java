@@ -50,7 +50,7 @@ public class WebController {
 
     @GetMapping("/")
     public String dashboard(
-        @RequestParam(value = "cameraId", required = false) Long cameraId,
+            @RequestParam(value = "cameraId", required = false) Long cameraId,
         Model model
     ) {
         // 1. Fetch all cameras once
@@ -225,5 +225,12 @@ public class WebController {
         captureScheduler.triggerPerspectiveMapTraining();
         redirectAttributes.addFlashAttribute("toastMessage", "원근 맵 학습을 시작했습니다. 결과는 잠시 후 로그를 확인하세요.");
         return "redirect:/";
+    }
+
+    @GetMapping("/admin/density-verification")
+    public String densityVerificationPage(Model model) {
+        List<CameraListView> cameraList = cameraService.listView();
+        model.addAttribute("cameras", cameraList != null ? cameraList : List.of());
+        return "debug-density";
     }
 }

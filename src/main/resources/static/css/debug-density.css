@@ -1,0 +1,388 @@
+/**
+ * debug-density.css
+ * 밀집도 로직 검증 디버그 페이지 스타일
+ */
+
+.debug-density-page {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.debug-surface {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* 페이지 헤더 */
+.page-header {
+    margin-bottom: 1rem;
+}
+
+.page-header__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.breadcrumbs {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+}
+
+.subtitle {
+    font-size: 1rem;
+    color: #6b7280;
+    margin: 0;
+}
+
+/* 검증 컨테이너 */
+.verification-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    position: relative;
+}
+
+/* 카드 스타일 */
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.card-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 0.5rem 0;
+}
+
+.card-subtitle {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* 폼 스타일 */
+.verification-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.field-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+.field input,
+.field select {
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.field input:focus,
+.field select:focus {
+    outline: none;
+    border-color: #0f62fe;
+    box-shadow: 0 0 0 3px rgba(15, 98, 254, 0.1);
+}
+
+.field-helper {
+    font-size: 0.75rem;
+    color: #6b7280;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+/* 버튼 스타일 */
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.btn:active {
+    transform: scale(0.98);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn--primary {
+    background: #0f62fe;
+    color: white;
+}
+
+.btn--primary:hover:not(:disabled) {
+    background: #0050e6;
+}
+
+.btn--ghost {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.btn--ghost:hover:not(:disabled) {
+    background: #e5e7eb;
+}
+
+/* 결과 카드 */
+.result-card {
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.result-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* 메트릭 그리드 */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.metric-card {
+    padding: 1rem;
+    background: #f9fafb;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+.metric-card--highlight {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    border-color: #93c5fd;
+}
+
+.metric-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #6b7280;
+    margin: 0 0 0.5rem 0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.metric-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+}
+
+.metric-value--large {
+    font-size: 2rem;
+}
+
+.metric-value--success {
+    color: #059669;
+}
+
+.metric-value--warning {
+    color: #d97706;
+}
+
+.metric-value--danger {
+    color: #dc2626;
+}
+
+.result-message {
+    padding: 1rem;
+    background: #ecfdf5;
+    border-left: 4px solid #10b981;
+    border-radius: 8px;
+}
+
+.result-message p {
+    margin: 0;
+    color: #047857;
+    font-weight: 500;
+}
+
+/* 에러 결과 */
+.result-content--error {
+    align-items: center;
+    text-align: center;
+    padding: 2rem 0;
+}
+
+.error-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.error-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #dc2626;
+    margin: 0 0 1rem 0;
+}
+
+.error-message {
+    font-size: 1rem;
+    color: #6b7280;
+    margin: 0 0 1.5rem 0;
+    max-width: 600px;
+}
+
+.error-details {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: left;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.error-details h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #991b1b;
+    margin: 0 0 1rem 0;
+}
+
+.error-details-list {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.5rem 1rem;
+    margin: 0;
+}
+
+.error-details-list dt {
+    font-weight: 500;
+    color: #7f1d1d;
+}
+
+.error-details-list dd {
+    margin: 0;
+    color: #991b1b;
+    font-family: monospace;
+}
+
+/* 로딩 오버레이 */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    z-index: 1000;
+    backdrop-filter: blur(2px);
+}
+
+.loading-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.loading-overlay p {
+    color: white;
+    font-size: 1rem;
+    font-weight: 500;
+    margin: 0;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+    .debug-density-page {
+        padding: 1rem;
+    }
+
+    .title {
+        font-size: 1.5rem;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .metric-value {
+        font-size: 1.25rem;
+    }
+
+    .metric-value--large {
+        font-size: 1.5rem;
+    }
+}

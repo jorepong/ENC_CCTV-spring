@@ -1,0 +1,128 @@
+
+/* Redesigned Trend Analysis Panel */
+.trend-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-top: 4px;
+}
+
+.trend-item {
+    display: flex;
+    align-items: flex-start; /* Align items to the top for better multi-line content */
+    gap: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.trend-item:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.trend-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background-color: #f1f5f9; /* Light gray background */
+    color: var(--muted); /* Muted gray icon color */
+}
+
+.trend-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Specific styles for the combined velocity & acceleration item */
+.trend-item--combined {
+    .trend-combined-content {
+        flex: 1;
+        display: flex;
+        flex-wrap: wrap; /* Allow wrapping on smaller screens if needed */
+        gap: 12px; /* Gap between velocity and acceleration sections */
+        align-items: center; /* Align sections vertically */
+
+        .trend-section {
+            flex: 1; /* Each section takes equal width */
+            min-width: 120px; /* Minimum width before wrapping */
+        }
+    }
+}
+
+
+.trend-content {
+    flex: 1;
+    min-width: 0; /* Prevent flex item overflow */
+}
+
+.trend-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 4px;
+}
+
+.trend-value-row {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.trend-value {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--ink);
+    font-feature-settings: "tnum";
+}
+
+.trend-unit {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-2);
+    margin-right: 6px;
+}
+
+.trend-value-text {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.4;
+}
+
+/* Trend Badges */
+.trend-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    background-color: #f3f4f6;
+    color: #4b5563;
+    transform: translateY(-1px);
+}
+
+.trend-badge--danger {
+    background-color: #fee2e2;
+    color: #ef4444;
+}
+
+.trend-badge--warning {
+    background-color: #fef3c7;
+    color: #f59e0b;
+}
+
+.trend-badge--success {
+    background-color: #dcfce7;
+    color: #16a34a;
+}
+
+.trend-badge--neutral {
+    background-color: #f1f5f9;
+    color: #64748b;
+}

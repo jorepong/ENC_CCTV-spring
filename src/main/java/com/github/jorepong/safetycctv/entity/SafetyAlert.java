@@ -3,7 +3,7 @@ package com.github.jorepong.safetycctv.entity;
 import com.github.jorepong.safetycctv.alert.AlertLevel;
 import com.github.jorepong.safetycctv.alert.AlertType;
 import jakarta.persistence.*;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -35,7 +35,7 @@ public class SafetyAlert {
      * The timestamp when the alert was generated.
      */
     @Column(nullable = false)
-    private Instant timestamp;
+    private LocalDateTime timestamp;
 
     /**
      * The type of event that triggered the alert.
@@ -59,7 +59,8 @@ public class SafetyAlert {
     private String message;
 
     /**
-     * The ID of the analysis log that is directly associated with this alert, if applicable.
+     * The ID of the analysis log that is directly associated with this alert, if
+     * applicable.
      */
     @Column(name = "analysis_log_id", insertable = false, updatable = false)
     private Long analysisLogId;
@@ -69,7 +70,8 @@ public class SafetyAlert {
     private AnalysisLog analysisLog;
 
     /**
-     * A flag indicating whether this alert has been acknowledged or resolved by an operator.
+     * A flag indicating whether this alert has been acknowledged or resolved by an
+     * operator.
      */
     @Builder.Default
     @Column(nullable = false)
@@ -78,12 +80,12 @@ public class SafetyAlert {
     /**
      * The timestamp when the alert was marked as resolved.
      */
-    private Instant resolvedAt;
+    private LocalDateTime resolvedAt;
 
     @PrePersist
     protected void onCreate() {
         if (this.timestamp == null) {
-            this.timestamp = Instant.now();
+            this.timestamp = LocalDateTime.now();
         }
     }
 }

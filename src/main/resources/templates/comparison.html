@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout :: layout(~{::title}, ~{::section}, ~{::headResources})}">
+    th:replace="~{layout :: layout(~{::title}, ~{::section}, ~{::headResources})}">
+
 <head>
     <title>패턴/비교 분석 | E-N-C 캠퍼스 관제</title>
     <th:block th:fragment="headResources">
@@ -9,90 +10,91 @@
         <script defer th:src="@{/js/comparison.js}"></script>
     </th:block>
 </head>
+
 <body>
-<section class="comparison-page">
-    <div class="comparison-surface">
-        <header class="comparison-header">
-            <div class="comparison-header__meta">
-                <p class="breadcrumbs">분석 &gt; 패턴/비교 분석</p>
-                <h1 class="title">패턴/비교 분석</h1>
+    <section class="comparison-page">
+        <div class="comparison-surface">
+            <header class="comparison-header">
+                <div class="comparison-header__meta">
+                    <p class="breadcrumbs">분석 &gt; 패턴/비교 분석</p>
+                    <h1 class="title">패턴/비교 분석</h1>
+                </div>
+            </header>
+
+            <div class="comparison-grid">
+                <aside class="control-panel">
+                    <div class="control-section">
+                        <div class="control-header">
+                            <h2 class="control-title">비교 대상 카메라</h2>
+                            <div class="checklist-actions">
+                                <button class="checklist-btn" id="selectAllBtn">전체 선택</button>
+                                <button class="checklist-btn" id="deselectAllBtn">전체 해제</button>
+                            </div>
+                        </div>
+                        <div class="camera-search">
+                            <input type="search" id="cameraSearch" placeholder="카메라 이름 검색...">
+                        </div>
+                        <div class="camera-checklist" id="cameraChecklist">
+                            <div th:each="camera : ${cameraListData}">
+                                <label>
+                                    <input type="checkbox" name="cameraSelect" th:value="${camera.id}">
+                                    <span th:text="${camera.name}">카메라 이름</span>
+                                </label>
+                            </div>
+                            <p th:if="${cameraListData == null or #lists.isEmpty(cameraListData)}">사용 가능한 카메라가 없습니다.</p>
+                        </div>
+                    </div>
+                    <div class="control-section">
+                        <h2 class="control-title">분석 기간</h2>
+                        <select id="dateRangeSelector">
+                            <option value="1">최근 24시간</option>
+                            <option value="7">지난 7일</option>
+                            <option value="30">지난 30일</option>
+                        </select>
+                    </div>
+                    <div class="control-section">
+                        <button id="runAnalysisBtn" class="run-button">분석 실행</button>
+                    </div>
+                </aside>
+
+                <main class="main-content">
+                    <div class="chart-container card">
+                        <div class="card-header">
+                            <h2 class="card-title">혼잡도 비교 차트</h2>
+                            <div class="chart-legend" id="chartLegend"></div>
+                        </div>
+                        <div class="chart-body">
+                            <div id="chartPlaceholder" class="chart-placeholder">
+                                <p>좌측 패널에서 비교할 카메라를 1개 이상 선택하고<br>'분석 실행' 버튼을 눌러주세요.</p>
+                            </div>
+                            <canvas id="comparisonChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="summary-grid">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">주간 최고 혼잡 장소 Top 5</h2>
+                                <p class="card-subtitle">지난 7일간 가장 높은 혼잡도를 기록한 장소</p>
+                            </div>
+                            <div class="card-body">
+                                <ol class="ranked-list" id="hotspotList"></ol>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">가장 예측이 어려운 장소 Top 5</h2>
+                                <p class="card-subtitle">혼잡도 변화가 가장 심했던 장소 (변동성 기준)</p>
+                            </div>
+                            <div class="card-body">
+                                <ol class="ranked-list" id="volatilityList"></ol>
+                            </div>
+                        </div>
+                    </div>
+                </main>
             </div>
-            <p class="subtitle">여러 카메라의 혼잡도 추이를 비교하여 장소 간의 관계와 특이점을 분석합니다.</p>
-        </header>
-
-        <div class="comparison-grid">
-            <aside class="control-panel">
-                <div class="control-section">
-                    <div class="control-header">
-                        <h2 class="control-title">비교 대상 카메라</h2>
-                        <div class="checklist-actions">
-                            <button class="checklist-btn" id="selectAllBtn">전체 선택</button>
-                            <button class="checklist-btn" id="deselectAllBtn">전체 해제</button>
-                        </div>
-                    </div>
-                    <div class="camera-search">
-                        <input type="search" id="cameraSearch" placeholder="카메라 이름 검색...">
-                    </div>
-                    <div class="camera-checklist" id="cameraChecklist">
-                        <div th:each="camera : ${cameraListData}">
-                            <label>
-                                <input type="checkbox" name="cameraSelect" th:value="${camera.id}">
-                                <span th:text="${camera.name}">카메라 이름</span>
-                            </label>
-                        </div>
-                        <p th:if="${cameraListData == null or #lists.isEmpty(cameraListData)}">사용 가능한 카메라가 없습니다.</p>
-                    </div>
-                </div>
-                <div class="control-section">
-                    <h2 class="control-title">분석 기간</h2>
-                    <select id="dateRangeSelector">
-                        <option value="1">최근 24시간</option>
-                        <option value="7">지난 7일</option>
-                        <option value="30">지난 30일</option>
-                    </select>
-                </div>
-                <div class="control-section">
-                    <button id="runAnalysisBtn" class="run-button">분석 실행</button>
-                </div>
-            </aside>
-
-            <main class="main-content">
-                <div class="chart-container card">
-                    <div class="card-header">
-                        <h2 class="card-title">혼잡도 비교 차트</h2>
-                        <div class="chart-legend" id="chartLegend"></div>
-                    </div>
-                    <div class="chart-body">
-                        <div id="chartPlaceholder" class="chart-placeholder">
-                            <p>좌측 패널에서 비교할 카메라를 1개 이상 선택하고<br>'분석 실행' 버튼을 눌러주세요.</p>
-                        </div>
-                        <canvas id="comparisonChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="summary-grid">
-                    <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">주간 최고 혼잡 장소 Top 5</h2>
-                            <p class="card-subtitle">지난 7일간 가장 높은 혼잡도를 기록한 장소</p>
-                        </div>
-                        <div class="card-body">
-                            <ol class="ranked-list" id="hotspotList"></ol>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">가장 예측이 어려운 장소 Top 5</h2>
-                            <p class="card-subtitle">혼잡도 변화가 가장 심했던 장소 (변동성 기준)</p>
-                        </div>
-                        <div class="card-body">
-                            <ol class="ranked-list" id="volatilityList"></ol>
-                        </div>
-                    </div>
-                </div>
-            </main>
         </div>
-    </div>
-</section>
+    </section>
 </body>
+
 </html>

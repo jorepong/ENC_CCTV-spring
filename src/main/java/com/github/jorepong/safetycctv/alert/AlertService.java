@@ -10,9 +10,7 @@ import com.github.jorepong.safetycctv.analysis.StageSeverity;
 import com.github.jorepong.safetycctv.camera.CameraService;
 import com.github.jorepong.safetycctv.entity.Camera;
 import com.github.jorepong.safetycctv.repository.SafetyAlertRepository;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -24,12 +22,10 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
 public class AlertService {
 
@@ -40,24 +36,15 @@ public class AlertService {
     private static final int TREND_WINDOW_HOURS = 12;
 
     public AlertTrend getHourlyTrendForLast24Hours() {
-        final Instant since = Instant.now().minus(TREND_WINDOW_HOURS, ChronoUnit.HOURS);
-        final List<Object[]> results = safetyAlertRepository.findAlertsPerHourSince(since);
-        log.debug("[AlertTrend] Repo aggregated results count={}", results.size());
-        if (!results.isEmpty()) {
-            final List<AlertsPerHour> alertsByHour = results.stream()
-                .map(row -> new AlertsPerHour((Integer) row[0], (Long) row[1]))
-                .toList();
-            final Map<Integer, Long> countsByHourMap = alertsByHour.stream()
-                .collect(Collectors.toMap(AlertsPerHour::hour, AlertsPerHour::count));
-            log.debug(
-                "[AlertTrend] Using aggregated counts for {} hours. Max count snapshot={}",
-                countsByHourMap.size(),
-                countsByHourMap.values().stream().mapToLong(Long::longValue).max().orElse(0L)
-            );
+        final LocalDateTime since = LocalDateTime.now().minus(TREND_WINDOW_HOURS, ChronoUnit.HOURS);
+        final List<LocalDateTime> timestamps = safetyAlertRepository.findAlertTimestampsSince(since);
+
+        if (!timestamps.isEmpty()) {
+            final Map<Integer, Long> countsByHourMap = timestamps.stream()
+                    .collect(Collectors.groupingBy(LocalDateTime::getHour, Collectors.counting()));
             return buildTrendFromHourlyCounts(countsByHourMap);
         }
 
-        log.info("[AlertTrend] No aggregated alert rows. Falling back to StageAlert timeline since {}", since);
         return buildTrendFromStageAlerts(LocalDateTime.now().minusHours(TREND_WINDOW_HOURS));
     }
 
@@ -77,26 +64,24 @@ public class AlertService {
                     continue;
                 }
                 collected.add(new RecentAlertView(
-                    camera.getId(),
-                    camera.getName(),
-                    resolveCameraLocation(camera),
-                    alert.title(),
-                    alert.message(),
-                    alert.severity(),
-                    alert.timestamp()
-                ));
+                        camera.getId(),
+                        camera.getName(),
+                        resolveCameraLocation(camera),
+                        alert.title(),
+                        alert.message(),
+                        alert.severity(),
+                        alert.timestamp()));
             }
         }
 
         final Comparator<RecentAlertView> byTimestamp = Comparator.comparing(
-            RecentAlertView::timestamp,
-            Comparator.nullsLast(LocalDateTime::compareTo)
-        ).reversed();
+                RecentAlertView::timestamp,
+                Comparator.nullsLast(LocalDateTime::compareTo)).reversed();
 
         return collected.stream()
-            .sorted(byTimestamp)
-            .limit(normalizedLimit)
-            .toList();
+                .sorted(byTimestamp)
+                .limit(normalizedLimit)
+                .toList();
     }
 
     public long countRecentAlertsSince(LocalDateTime since) {
@@ -123,8 +108,8 @@ public class AlertService {
 
         List<Camera> cameras = cameraService.fetchAll();
         List<Camera> targetCameras = query.cameraId() != null
-            ? cameras.stream().filter(c -> Objects.equals(c.getId(), query.cameraId())).toList()
-            : cameras;
+                ? cameras.stream().filter(c -> Objects.equals(c.getId(), query.cameraId())).toList()
+                : cameras;
 
         List<AlertHistoryPayload> records = new ArrayList<>();
         for (Camera camera : targetCameras) {
@@ -132,9 +117,8 @@ public class AlertService {
                 continue;
             }
             List<StageAlertView> alerts = analysisInsightsService.findStageAlertsSince(
-                camera.getId(),
-                start
-            );
+                    camera.getId(),
+                    start);
             for (StageAlertView alert : alerts) {
                 if (alert == null || alert.timestamp() == null) {
                     continue;
@@ -171,18 +155,16 @@ public class AlertService {
         List<AlertHistoryPayload> pageContent = records.subList(fromIndex, toIndex);
 
         return new AlertHistoryResponse(
-            pageContent,
-            totalElements,
-            totalPages,
-            query.page(),
-            query.size()
-        );
+                pageContent,
+                totalElements,
+                totalPages,
+                query.page(),
+                query.size());
     }
 
     private AlertTrend buildTrendFromStageAlerts(LocalDateTime cutoff) {
         final Map<Integer, Long> countsByHourMap = new HashMap<>();
         final List<Camera> cameras = cameraService.fetchAll();
-        log.debug("[AlertTrend] Building fallback trend from {} cameras", cameras.size());
         for (Camera camera : cameras) {
             List<StageAlertView> alerts = analysisInsightsService.findStageAlertsSince(camera.getId(), cutoff);
             for (StageAlertView alert : alerts) {
@@ -199,20 +181,19 @@ public class AlertService {
     }
 
     private AlertTrend buildTrendFromHourlyCounts(Map<Integer, Long> countsByHourMap) {
-        log.debug("[AlertTrend] Aggregated fallback counts entries={}", countsByHourMap.size());
         final int currentHour = LocalDateTime.now().getHour();
         final int startHour = currentHour - TREND_WINDOW_HOURS + 1;
         final List<AlertsPerHour> fullTrend = IntStream.range(0, TREND_WINDOW_HOURS)
-            .map(i -> (startHour + i + 24) % 24)
-            .mapToObj(hour -> {
-                long count = countsByHourMap.getOrDefault(hour, 0L);
-                return new AlertsPerHour(hour, count);
-            })
-            .toList();
+                .map(i -> (startHour + i + 24) % 24)
+                .mapToObj(hour -> {
+                    long count = countsByHourMap.getOrDefault(hour, 0L);
+                    return new AlertsPerHour(hour, count);
+                })
+                .toList();
         final long maxCount = fullTrend.stream()
-            .mapToLong(AlertsPerHour::count)
-            .max()
-            .orElse(0L);
+                .mapToLong(AlertsPerHour::count)
+                .max()
+                .orElse(0L);
         return new AlertTrend(fullTrend, maxCount);
     }
 
@@ -220,25 +201,28 @@ public class AlertService {
         if (keyword == null || keyword.isBlank()) {
             return true;
         }
-        String cameraName = camera != null && camera.getName() != null ? camera.getName().toLowerCase(Locale.KOREAN) : "";
+        String cameraName = camera != null && camera.getName() != null ? camera.getName().toLowerCase(Locale.KOREAN)
+                : "";
         String title = alert.title() != null ? alert.title().toLowerCase(Locale.KOREAN) : "";
         String message = alert.message() != null ? alert.message().toLowerCase(Locale.KOREAN) : "";
         return cameraName.contains(keyword)
-            || title.contains(keyword)
-            || message.contains(keyword);
+                || title.contains(keyword)
+                || message.contains(keyword);
     }
 
     private void sortRecords(List<AlertHistoryPayload> records, Sort.Order order) {
         Comparator<AlertHistoryPayload> comparator;
         String property = order.getProperty();
         if ("cameraName".equalsIgnoreCase(property)) {
-            comparator = Comparator.comparing(AlertHistoryPayload::cameraName, Comparator.nullsLast(String::compareToIgnoreCase));
+            comparator = Comparator.comparing(AlertHistoryPayload::cameraName,
+                    Comparator.nullsLast(String::compareToIgnoreCase));
         } else if ("severity".equalsIgnoreCase(property)) {
             comparator = Comparator.comparing(payload -> severityRank(payload.severity()), Comparator.naturalOrder());
         } else if ("density".equalsIgnoreCase(property)) {
             comparator = Comparator.comparing(AlertHistoryPayload::density);
         } else {
-            comparator = Comparator.comparing(AlertHistoryPayload::timestamp, Comparator.nullsLast(LocalDateTime::compareTo));
+            comparator = Comparator.comparing(AlertHistoryPayload::timestamp,
+                    Comparator.nullsLast(LocalDateTime::compareTo));
         }
 
         if (order.getDirection() == Sort.Direction.DESC) {

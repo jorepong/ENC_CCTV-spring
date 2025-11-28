@@ -73,6 +73,12 @@ public class AnalysisLog {
     private Double densityAcceleration;
 
     /**
+     * Estimated Time to Alert (ETA) for a specific threshold, if applicable. (e.g., ETA to DANGER_THRESHOLD)
+     * This value represents the estimated time in minutes.
+     */
+    private Double eta;
+
+    /**
      * The path to the raw captured frame image stored in the shared storage.
      */
     @Column(length = 512)

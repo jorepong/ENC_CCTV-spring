@@ -38,6 +38,14 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchAndRenderSummary();
     fetchAndRenderSummaryPanels();
 
+    // Render initial panel data immediately if available (SSR injection)
+    if (window.initialPanelData) {
+        renderPanel(window.initialPanelData);
+    } else {
+        // Only fetch if no initial data was provided
+        fetchAndRenderPanel(cameraId);
+    }
+
     // Set up polling intervals to fetch fresh data periodically
     setInterval(() => updateSnapshotImage(cameraId), SNAPSHOT_POLLING_INTERVAL);
     setInterval(() => fetchAndRenderPanel(cameraId), PANEL_POLLING_INTERVAL);
@@ -330,22 +338,22 @@ function renderPanel(data) {
         levelChip.className = `chip chip--${hasData ? data.statusTone : 'neutral'}`;
     }
 
-    const etaChip = document.getElementById('panel-eta-chip');
-    if (etaChip) {
-        if (!hasData || data.congestionLevel === 'DANGER') {
-            etaChip.style.display = 'none';
-            etaChip.textContent = '예상 시간 정보 없음';
-        } else {
-            etaChip.style.display = 'inline-flex';
-            const etaText = data.etaMessage
-                || (data.etaType === 'ENTERING_DANGER' && data.etaSeconds > 0
-                    ? `${Math.ceil(data.etaSeconds / 60)}분 후 위험 진입 예상`
-                    : data.etaType === 'EXITING_DANGER' && data.etaSeconds > 0
-                        ? `${Math.ceil(data.etaSeconds / 60)}분 후 위험 해제 예상`
-                        : '주요 추세 변화 감지되지 않음.');
-            etaChip.textContent = etaText;
-        }
-    }
+    // const etaChip = document.getElementById('panel-eta-chip');
+    // if (etaChip) {
+    //     if (!hasData || data.congestionLevel === 'DANGER') {
+    //         etaChip.style.display = 'none';
+    //         etaChip.textContent = '예상 시간 정보 없음';
+    //     } else {
+    //         etaChip.style.display = 'inline-flex';
+    //         const etaText = data.etaMessage
+    //             || (data.etaType === 'ENTERING_DANGER' && data.etaSeconds > 0
+    //                 ? `${Math.ceil(data.etaSeconds / 60)}분 후 위험 진입 예상`
+    //                 : data.etaType === 'EXITING_DANGER' && data.etaSeconds > 0
+    //                     ? `${Math.ceil(data.etaSeconds / 60)}분 후 위험 해제 예상`
+    //                     : '주요 추세 변화 감지되지 않음.');
+    //         etaChip.textContent = etaText;
+    //     }
+    // }
 
     renderTimeline(data);
 
@@ -354,6 +362,43 @@ function renderPanel(data) {
     } else {
         updateDangerDurationTimer('FREE', 0, null);
     }
+
+    renderAlertBanner(data.latestAlert);
+}
+
+function renderAlertBanner(alert) {
+    const banner = document.getElementById('camera-alert-banner');
+    if (!banner) return;
+
+    if (!alert) {
+        banner.classList.add('alert-banner--hidden');
+        return;
+    }
+
+    // Check if the alert is recent (within 10 minutes)
+    const alertTime = new Date(alert.timestamp);
+    const now = new Date();
+    const diffMs = now - alertTime;
+    const tenMinutesMs = 10 * 60 * 1000;
+
+    if (isNaN(alertTime.getTime()) || diffMs > tenMinutesMs) {
+        banner.classList.add('alert-banner--hidden');
+        return;
+    }
+
+    banner.classList.remove('alert-banner--hidden');
+    banner.classList.remove('alert-banner--danger', 'alert-banner--warning', 'alert-banner--info');
+
+    const severity = (alert.severity || 'info').toLowerCase();
+    banner.classList.add(`alert-banner--${severity}`);
+
+    const titleEl = document.getElementById('camera-alert-title');
+    const msgEl = document.getElementById('camera-alert-message');
+    const timeEl = document.getElementById('camera-alert-time');
+
+    if (titleEl) titleEl.textContent = alert.title || '알림';
+    if (msgEl) msgEl.textContent = alert.message || '';
+    if (timeEl) timeEl.textContent = formatAlertTime(alert.timestamp);
 }
 
 function renderTimeline(data) {

@@ -6,6 +6,7 @@
     <title>상세 분석 | E-N-C 캠퍼스 안전</title>
     <th:block th:fragment="headResources">
         <link rel="stylesheet" th:href="@{/css/analysis.css}">
+        <link rel="stylesheet" th:href="@{/css/analysis-trend.css}">
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script defer th:src="@{/js/analysis.js}"></script>
     </th:block>
@@ -213,60 +214,21 @@
                             </div>
                         </div>
 
-                        <!-- Trend Analysis (Velocity, Acceleration, ETA) -->
-                        <div class="status-summary" style="margin-top: 16px;">
-                            <div class="card-head" style="margin-bottom: 12px;">
-                                <div class="card-title" style="font-size: 15px;">추세 분석</div>
+                        <!-- Comparison Analysis (Yesterday vs Last Week) -->
+                        <div id="comparison-container" class="status-compare-grid">
+                            <div class="status-compare-item">
+                                <span class="status-compare-label">전일 동시간 대비</span>
+                                <span class="status-compare-value" style="color: var(--muted); font-size: 13px;">데이터 로딩
+                                    중...</span>
                             </div>
-                            <div class="status-trend">
-                                <div class="status-trend__item">
-                                    <div class="status-trend__icon" aria-hidden="true">↗</div>
-                                    <div>
-                                        <p class="status-trend__label">변화율 (Velocity)</p>
-                                        <p class="status-trend__value">
-                                            <span
-                                                th:text="${cameraAnalytics.densityVelocityPerMin() != null ? #numbers.formatDecimal(cameraAnalytics.densityVelocityPerMin(), 1, 4) : '--'}">0.0</span>
-                                            <th:block th:with="velocity=${cameraAnalytics.densityVelocityPerMin()}">
-                                                <span th:if="${velocity != null}" class="chip" th:styleappend="${
-                                                      'margin-left: 8px; font-size: 11px; padding: 2px 8px;' +
-                                                      (velocity < -0.05 ? 'background-color: #dbeafe; color: #1e40af;' :
-                                                      (velocity < -0.005 ? 'background-color: #e0e7ff; color: #3730a3;' : ''))
-                                                  }" th:classappend="${
-                                                      velocity > 0.05 ? 'chip--danger' :
-                                                      velocity > 0.005 ? 'chip--warning' : 'chip--neutral'
-                                                  }" th:text="${
-                                                      velocity > 0.05 ? '빠른 증가' :
-                                                      velocity > 0.005 ? '완만한 증가' :
-                                                      velocity < -0.05 ? '빠른 감소' :
-                                                      velocity < -0.005 ? '완만한 감소' : '안정'
-                                                  }">
-                                                </span>
-                                            </th:block>
-                                        </p>
-                                    </div>
-                                </div>
-                                <div class="status-trend__item">
-                                    <div class="status-trend__icon" aria-hidden="true">⏩</div>
-                                    <div>
-                                        <p class="status-trend__label">변화 가속도 (Acceleration)</p>
-                                        <p class="status-trend__value">
-                                            <span
-                                                th:text="${cameraAnalytics.densityAccelerationPerMin2() != null ? #numbers.formatDecimal(cameraAnalytics.densityAccelerationPerMin2(), 1, 5) : '--'}">0.0</span>
-                                        </p>
-                                    </div>
-                                </div>
-                                <div class="status-trend__item" style="flex-basis: 100%;">
-                                    <div class="status-trend__icon" aria-hidden="true">⏱</div>
-                                    <div>
-                                        <p class="status-trend__label">위험 도달 시간 (ETA)</p>
-                                        <p class="status-trend__value"
-                                            th:text="${cameraAnalytics.etaMessage() != null ? cameraAnalytics.etaMessage() : '예측 정보 없음'}">
-                                            예측 정보 없음
-                                        </p>
-                                    </div>
-                                </div>
+                            <div class="status-compare-item">
+                                <span class="status-compare-label">지난주 동시간 대비</span>
+                                <span class="status-compare-value" style="color: var(--muted); font-size: 13px;">데이터 로딩
+                                    중...</span>
                             </div>
                         </div>
+
+
                     </article>
 
                     <div class="info-panel-placeholder" th:unless="${cameraAnalytics}">
@@ -294,6 +256,70 @@
                             </div>
                         </div>
                     </article>
+
+                    <article class="card h-pad" th:if="${cameraAnalytics}">
+                        <div class="card-head">
+                            <div>
+                                <div class="card-title">추세 분석</div>
+                                <div class="muted">변화율 및 가속도 기반 예측</div>
+                            </div>
+                        </div>
+                        <div class="trend-list">
+                                                        <!-- Velocity & Acceleration Combined -->
+                                                        <div class="trend-item trend-item--combined">
+                                                            <div class="trend-icon">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                                                            </div>
+                                                            <div class="trend-combined-content">
+                                                                <div class="trend-section">
+                                                                    <div class="trend-label">밀집도 변화율 (속도)</div>
+                                                                    <div class="trend-value-row">
+                                                                        <span class="trend-value" th:text="${cameraAnalytics.densityVelocityPerMin() != null ? #numbers.formatDecimal(cameraAnalytics.densityVelocityPerMin(), 1, 4) : '--'}">0.0000</span>
+                                                                        <span class="trend-unit">/min</span>
+                                                                        <th:block th:with="velocity=${cameraAnalytics.densityVelocityPerMin()}">
+                                                                            <span th:if="${velocity != null}" class="trend-badge"
+                                                                                  th:classappend="${
+                                                                                      velocity > 0.05 ? 'trend-badge--danger' :
+                                                                                      velocity > 0.005 ? 'trend-badge--warning' :
+                                                                                      velocity < -0.05 ? 'trend-badge--success' :
+                                                                                      velocity < -0.005 ? 'trend-badge--success' : 'trend-badge--neutral'
+                                                                                  }"
+                                                                                  th:text="${
+                                                                                      velocity > 0.05 ? '빠른 증가' :
+                                                                                      velocity > 0.005 ? '증가세' :
+                                                                                      velocity < -0.05 ? '빠른 감소' :
+                                                                                      velocity < -0.005 ? '감소세' : '안정'
+                                                                                  }">
+                                                                            </span>
+                                                                        </th:block>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="trend-section">
+                                                                    <div class="trend-label">변화 가속도</div>
+                                                                    <div class="trend-value-row">
+                                                                        <span class="trend-value" th:text="${cameraAnalytics.densityAccelerationPerMin2() != null ? #numbers.formatDecimal(cameraAnalytics.densityAccelerationPerMin2(), 1, 5) : '--'}">0.00000</span>
+                                                                        <span class="trend-unit">/min²</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                            
+                                                        <!-- ETA -->
+                                                        <div class="trend-item">
+                                                            <div class="trend-icon">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                                            </div>
+                                                            <div class="trend-content">
+                                                                <div class="trend-label">위험 도달 예상 시간 (ETA)</div>
+                                                                <div class="trend-value-row">
+                                                                    <span class="trend-value-text"
+                                                                          th:text="${cameraAnalytics.etaMessage() != null ? cameraAnalytics.etaMessage() : '특이사항 없음'}">
+                                                                        특이사항 없음
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>                    </article>
 
                     <article class="card h-pad">
                         <div class="card-head">

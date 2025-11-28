@@ -21,6 +21,7 @@ public record CameraAnalyticsSummary(
     LocalDateTime timeInDangerSince,
     List<DensitySample> densitySeries,
     List<StageAlertView> stageAlerts,
+    StageAlertView latestPersistedAlert,
     TrainingStatus trainingStatus // New field
 ) {
 

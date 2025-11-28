@@ -276,7 +276,7 @@
         elements.infoLatitude.textContent = formatCoordinate(camera.latitude, "lat");
         elements.infoLongitude.textContent = formatCoordinate(camera.longitude, "lng");
         if (elements.infoLink) {
-            elements.infoLink.href = "/cameras";
+            elements.infoLink.href = `/analysis?cameraId=${camera.id}`;
         }
         elements.infoPanel.hidden = false;
     }

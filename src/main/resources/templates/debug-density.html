@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::title}, ~{::section}, ~{::headResources})}">
+<head>
+    <title>밀집도 검증 | E-N-C 디버그</title>
+    <th:block th:fragment="headResources">
+        <link rel="stylesheet" th:href="@{/css/debug-density.css}">
+        <script th:src="@{/js/debug-density.js}" defer></script>
+    </th:block>
+</head>
+<body>
+<section class="debug-density-page">
+    <div class="debug-surface">
+        <header class="page-header">
+            <div class="page-header__meta">
+                <p class="breadcrumbs">디버그 &gt; 밀집도 검증</p>
+                <h1 class="title">밀집도 로직 검증</h1>
+                <p class="subtitle">카메라와 인원 수를 입력하여 해당 장소의 예상 밀집도를 계산합니다.</p>
+            </div>
+        </header>
+
+        <div class="verification-container">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">검증 파라미터</h2>
+                    <p class="card-subtitle">카메라를 선택하고 가상의 인원 수를 입력하세요.</p>
+                </div>
+                <div class="card-body">
+                    <form id="verification-form" class="verification-form" onsubmit="return false;">
+                        <div class="form-grid">
+                            <label class="field">
+                                <span class="field-label">카메라 선택</span>
+                                <select id="camera-select" name="cameraId" required>
+                                    <option value="">카메라를 선택하세요</option>
+                                    <option th:each="camera : ${cameras}"
+                                            th:value="${camera.id()}"
+                                            th:text="${camera.name() + ' (' + camera.location() + ')'}">
+                                        카메라 1
+                                    </option>
+                                </select>
+                                <span class="field-helper">원근 맵이 학습된 카메라를 선택하세요.</span>
+                            </label>
+
+                            <label class="field">
+                                <span class="field-label">인원 수</span>
+                                <input type="number"
+                                       id="person-count-input"
+                                       name="targetPersonCount"
+                                       min="1"
+                                       max="1000"
+                                       placeholder="10"
+                                       required>
+                                <span class="field-helper">ROI 영역 내에 생성할 가상 인원 수 (1~1000)</span>
+                            </label>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" id="verify-btn" class="btn btn--primary" onclick="verifyDensity()">
+                                검증 실행
+                            </button>
+                            <button type="reset" class="btn btn--ghost">초기화</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 결과 표시 영역 -->
+            <div id="result-section" class="card result-card" style="display: none;">
+                <div class="card-header">
+                    <h2 class="card-title">검증 결과</h2>
+                    <p class="card-subtitle" id="result-subtitle">계산된 밀집도와 상세 정보</p>
+                </div>
+                <div class="card-body">
+                    <!-- 성공 결과 -->
+                    <div id="success-result" class="result-content" style="display: none;">
+                        <div class="metrics-grid">
+                            <div class="metric-card">
+                                <p class="metric-label">카메라 ID</p>
+                                <p class="metric-value" id="result-camera-id">-</p>
+                            </div>
+                            <div class="metric-card">
+                                <p class="metric-label">가상 인원 수</p>
+                                <p class="metric-value" id="result-person-count">-</p>
+                            </div>
+                            <div class="metric-card metric-card--highlight">
+                                <p class="metric-label">계산된 밀집도</p>
+                                <p class="metric-value metric-value--large" id="result-density">-</p>
+                            </div>
+                            <div class="metric-card">
+                                <p class="metric-label">ROI 수용량</p>
+                                <p class="metric-value" id="result-capacity">-</p>
+                            </div>
+                            <div class="metric-card">
+                                <p class="metric-label">생성된 좌표 수</p>
+                                <p class="metric-value" id="result-generated-points">-</p>
+                            </div>
+                            <div class="metric-card">
+                                <p class="metric-label">상태</p>
+                                <p class="metric-value metric-value--success" id="result-status">SUCCESS</p>
+                            </div>
+                        </div>
+                        <div class="result-message">
+                            <p id="result-message-text"></p>
+                        </div>
+                    </div>
+
+                    <!-- 실패 결과 -->
+                    <div id="error-result" class="result-content result-content--error" style="display: none;">
+                        <div class="error-icon">⚠️</div>
+                        <h3 class="error-title">검증 실패</h3>
+                        <p class="error-message" id="error-message-text"></p>
+                        <div id="error-details" class="error-details" style="display: none;">
+                            <h4>잘못된 좌표 정보</h4>
+                            <dl class="error-details-list">
+                                <dt>X 좌표:</dt>
+                                <dd id="error-coord-x">-</dd>
+                                <dt>Y 좌표:</dt>
+                                <dd id="error-coord-y">-</dd>
+                                <dt>원근 맵 값:</dt>
+                                <dd id="error-coord-value">-</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 로딩 상태 -->
+            <div id="loading-overlay" class="loading-overlay" style="display: none;">
+                <div class="loading-spinner"></div>
+                <p>밀집도 계산 중...</p>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>

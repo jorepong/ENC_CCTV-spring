@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class PerspectiveTrainingDataPruner {
 
-    private static final int MAX_DATA_POINTS_PER_CAMERA = 5_000;
+    private static final int MAX_DATA_POINTS_PER_CAMERA = 20_000;
 
     private final CameraRepository cameraRepository;
     private final DetectedObjectRepository detectedObjectRepository;

@@ -102,7 +102,8 @@
     font-size: 14px;
 }
 
-.history-table th, .history-table td {
+.history-table th,
+.history-table td {
     padding: 0.875rem 1.25rem;
     border-bottom: 1px solid var(--border-color);
 }
@@ -203,22 +204,25 @@
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
     display: flex;
-    justify-content: center;
-    align-items: center;
     z-index: 1000;
+    padding: 20px;
+    overflow: auto; /* Allow scrolling on small screens */
 }
 
 .modal-content {
     background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    width: 90%;
-    max-width: 1200px;
-    height: 90vh;
+    border-radius: 12px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    width: 100%;
+    max-width: 1000px;
+    min-width: 900px; /* Enforce minimum width to prevent layout breaking */
+    height: max-content;
+    margin: auto; /* Center modal vertically and horizontally */
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    position: relative;
 }
 
 .modal-header {
@@ -227,131 +231,195 @@
     align-items: center;
     padding: 16px 24px;
     border-bottom: 1px solid #e5e7eb;
+    background-color: #fff;
+    z-index: 10;
+    border-radius: 12px 12px 0 0;
 }
 
 .modal-header h2 {
     font-size: 1.25rem;
-    font-weight: 600;
+    font-weight: 700;
     color: #111827;
 }
 
 .modal-close-button {
     background: none;
     border: none;
-    font-size: 2rem;
+    font-size: 1.5rem;
     line-height: 1;
     cursor: pointer;
-    color: #6b7280;
+    color: #9ca3af;
+    padding: 4px;
+    border-radius: 4px;
+    transition: color 0.2s, background-color 0.2s;
+}
+
+.modal-close-button:hover {
+    color: #111827;
+    background-color: #f3f4f6;
 }
 
 .modal-body {
     flex-grow: 1;
-    display: flex;
-    overflow: hidden;
     padding: 24px;
+    display: flex;
+    flex-direction: column;
     gap: 24px;
 }
 
-.modal-body__main {
-    flex: 3;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    min-width: 0;
-}
-
-.modal-body__sidebar {
-    flex: 1;
-    border-left: 1px solid #e5e7eb;
-    padding-left: 24px;
-    display: flex;
-    flex-direction: column;
-}
-
-.modal-body__sidebar h3 {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 16px;
-    color: #111827;
-}
-
-.image-comparison {
+/* 1. Images Section */
+.modal-images-section {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 16px;
-    flex: 1;
-    min-height: 0;
 }
 
-.image-comparison figure {
+.image-container {
     margin: 0;
     display: flex;
     flex-direction: column;
     border: 1px solid #e5e7eb;
-    border-radius: 6px;
+    border-radius: 8px;
     overflow: hidden;
+    background-color: #f9fafb;
 }
 
-.image-comparison figcaption {
-    padding: 8px 12px;
-    font-weight: 500;
-    background-color: #f9fafb;
+.image-container figcaption {
+    padding: 10px 16px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    background-color: #fff;
     border-bottom: 1px solid #e5e7eb;
-    text-align: center;
     color: #374151;
 }
 
-.image-comparison img {
+.image-wrapper {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    /* Enforce 16:9 aspect ratio */
+    background-color: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.image-wrapper img {
     width: 100%;
     height: 100%;
     object-fit: contain;
-    background-color: #f3f4f6;
+    /* Ensure image fits within the 16:9 box */
+}
+
+/* 2. Metrics Bar */
+.modal-metrics-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.metric-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+}
+
+.metric-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.metric-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0f172a;
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+}
+
+.metric-divider {
+    width: 1px;
+    height: 40px;
+    background-color: #cbd5e1;
+}
+
+/* 3. Chart Section */
+.modal-chart-section h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 12px;
 }
 
 .chart-container {
-    flex-shrink: 0;
-    height: 200px; /* Adjust as needed */
-    padding-top: 16px;
+    height: 250px;
+    /* Fixed height for chart */
+    width: 100%;
+    position: relative;
 }
 
-.info-grid {
-    display: grid;
-    gap: 12px;
-}
-
-.info-item {
+/* Loading Overlay */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    padding: 10px;
-    background-color: #f9fafb;
-    border-radius: 4px;
-}
-
-.info-label {
-    font-weight: 500;
-    color: #4b5563;
-}
-
-.info-value {
-    font-weight: 600;
-    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
-    color: #1e3a8a;
+    z-index: 50;
 }
 
 .loading-spinner {
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #3b82f6;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #3b82f6;
     border-radius: 50%;
     width: 40px;
     height: 40px;
     animation: spin 1s linear infinite;
-    margin: 40px auto;
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .modal-images-section {
+        grid-template-columns: 1fr;
+        /* Stack images on mobile */
+    }
+
+    .modal-metrics-bar {
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .metric-divider {
+        display: none;
+    }
+
+    .metric-card {
+        min-width: 45%;
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 8px;
+    }
 }
 
 .filter-item--full-width {
@@ -397,4 +465,3 @@
     min-width: 100px;
     width: 100px;
 }
-

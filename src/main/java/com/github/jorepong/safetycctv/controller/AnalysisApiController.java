@@ -41,8 +41,7 @@ public class AnalysisApiController {
 
     @GetMapping("/cameras/statistics")
     public ResponseEntity<List<CameraStatisticsPayload>> getCameraStatistics(
-        @RequestParam(defaultValue = "7") int days
-    ) {
+            @RequestParam(defaultValue = "7") int days) {
         List<CameraStatisticsPayload> stats = analysisInsightsService.getCameraStatistics(days);
         return ResponseEntity.ok(stats);
     }
@@ -61,10 +60,9 @@ public class AnalysisApiController {
 
     @GetMapping("/cameras/{cameraId}/density-history")
     public ResponseEntity<List<DensityPointPayload>> getDensityHistory(
-        @PathVariable Long cameraId,
-        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
-        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end
-    ) {
+            @PathVariable Long cameraId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
         List<DensityPointPayload> history = analysisInsightsService.getDensityHistory(cameraId, start, end);
         return ResponseEntity.ok(history);
     }
@@ -74,8 +72,8 @@ public class AnalysisApiController {
         List<Camera> cameras = cameraService.fetchAll();
         Map<Long, CameraAnalyticsSummary> summaries = analysisInsightsService.summarizeCameras(cameras);
         List<CameraStatusPayload> payloads = summaries.values().stream()
-            .map(CameraStatusPayload::from)
-            .toList();
+                .map(CameraStatusPayload::from)
+                .toList();
         return ResponseEntity.ok(payloads);
     }
 
@@ -98,13 +96,12 @@ public class AnalysisApiController {
 
     @GetMapping("/cameras/{cameraId}/alerts")
     public ResponseEntity<List<StageAlertPayload>> getCameraAlerts(
-        @PathVariable Long cameraId,
-        @RequestParam(value = "limit", defaultValue = "10") int limit
-    ) {
+            @PathVariable Long cameraId,
+            @RequestParam(value = "limit", defaultValue = "10") int limit) {
         List<StageAlertView> alerts = analysisInsightsService.findStageAlerts(cameraId, limit);
         List<StageAlertPayload> payloads = alerts.stream()
-            .map(StageAlertPayload::from)
-            .toList();
+                .map(StageAlertPayload::from)
+                .toList();
         return ResponseEntity.ok(payloads);
     }
 
@@ -115,42 +112,47 @@ public class AnalysisApiController {
             return ResponseEntity.notFound().build();
         }
         return analysisInsightsService.summarizeCamera(cameraOpt.get())
-            .map(AnalysisCameraPayload::from)
-            .map(ResponseEntity::ok)
-            .orElseGet(() -> ResponseEntity.notFound().build());
+                .map(AnalysisCameraPayload::from)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/cameras/{cameraId}/comparison-summary")
+    public ResponseEntity<ComparisonSummaryPayload> getComparisonSummary(@PathVariable Long cameraId) {
+        ComparisonSummaryPayload payload = analysisInsightsService.getComparisonSummary(cameraId);
+        return ResponseEntity.ok(payload);
     }
 
     @GetMapping("/analysis-logs/{logId}/details")
     public ResponseEntity<AnalysisLogDetailPayload> getAnalysisLogDetails(@PathVariable Long logId) {
         return analysisInsightsService.getLogDetails(logId)
-            .map(ResponseEntity::ok)
-            .orElseGet(() -> ResponseEntity.notFound().build());
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/alerts/recent")
     public ResponseEntity<List<RecentAlertPayload>> getRecentAlerts(
-        @RequestParam(value = "limit", defaultValue = "10") int limit
-    ) {
+            @RequestParam(value = "limit", defaultValue = "10") int limit) {
         List<RecentAlertPayload> payloads = alertService.getRecentAlerts(limit).stream()
-            .map(RecentAlertPayload::from)
-            .toList();
+                .map(RecentAlertPayload::from)
+                .toList();
         return ResponseEntity.ok(payloads);
     }
 
     @GetMapping("/alerts/history")
     public AlertHistoryResponse getAlertHistory(
-        @RequestParam(value = "page", required = false) Integer page,
-        @RequestParam(value = "size", required = false) Integer size,
-        @RequestParam(value = "sort", required = false) String sort,
-        @RequestParam(value = "level", required = false) String level,
-        @RequestParam(value = "cameraId", required = false) Long cameraId,
-        @RequestParam(value = "search", required = false) String search,
-        @RequestParam(value = "start", required = false) String start,
-        @RequestParam(value = "end", required = false) String end,
-        @RequestParam(value = "minDensity", required = false) Double minDensity,
-        @RequestParam(value = "maxDensity", required = false) Double maxDensity
-    ) {
-        AlertHistoryQuery query = AlertHistoryQuery.of(page, size, sort, level, cameraId, search, start, end, minDensity, maxDensity);
+            @RequestParam(value = "page", required = false) Integer page,
+            @RequestParam(value = "size", required = false) Integer size,
+            @RequestParam(value = "sort", required = false) String sort,
+            @RequestParam(value = "level", required = false) String level,
+            @RequestParam(value = "cameraId", required = false) Long cameraId,
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "start", required = false) String start,
+            @RequestParam(value = "end", required = false) String end,
+            @RequestParam(value = "minDensity", required = false) Double minDensity,
+            @RequestParam(value = "maxDensity", required = false) Double maxDensity) {
+        AlertHistoryQuery query = AlertHistoryQuery.of(page, size, sort, level, cameraId, search, start, end,
+                minDensity, maxDensity);
         return alertService.getAlertHistory(query);
     }
 
@@ -163,19 +165,18 @@ public class AnalysisApiController {
     public ResponseEntity<DashboardSummary> getDashboardSummary() {
         List<Camera> allCameras = cameraService.fetchAll();
         List<DashboardCameraView> streamingCameras = allCameras.stream()
-            .map(DashboardCameraView::from)
-            .flatMap(Optional::stream)
-            .toList();
+                .map(DashboardCameraView::from)
+                .flatMap(Optional::stream)
+                .toList();
         Map<Long, CameraAnalyticsSummary> summaries = analysisInsightsService.summarizeCameras(allCameras);
-        DashboardSummary baseSummary =
-            analysisInsightsService.buildDashboardSummary(allCameras, streamingCameras, summaries);
+        DashboardSummary baseSummary = analysisInsightsService.buildDashboardSummary(allCameras, streamingCameras,
+                summaries);
         DashboardSummary enriched = new DashboardSummary(
-            baseSummary.totalCameras(),
-            baseSummary.streamingCameras(),
-            baseSummary.camerasWithData(),
-            baseSummary.camerasInDanger(),
-            alertService.countRecentAlertsSince(LocalDateTime.now().minusMinutes(30))
-        );
+                baseSummary.totalCameras(),
+                baseSummary.streamingCameras(),
+                baseSummary.camerasWithData(),
+                baseSummary.camerasInDanger(),
+                alertService.countRecentAlertsSince(LocalDateTime.now().minusMinutes(30)));
         return ResponseEntity.ok(enriched);
     }
 }

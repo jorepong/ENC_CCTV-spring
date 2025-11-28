@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalRawImage = document.getElementById('modalRawImage');
     const modalAnnotatedImage = document.getElementById('modalAnnotatedImage');
     const modalDensity = document.getElementById('modalDensity');
+    const modalPersonCount = document.getElementById('modalPersonCount');
     const modalVelocity = document.getElementById('modalVelocity');
     const modalAcceleration = document.getElementById('modalAcceleration');
     const modalLoading = document.getElementById('modalLoading');
@@ -109,12 +110,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     customDensityFilter.style.display = 'none';
                     break;
                 case 'caution':
-                    state.minDensity = '0.3';
-                    state.maxDensity = '0.6';
+                    state.minDensity = '0.463';  // LOS C (log scaled)
+                    state.maxDensity = '1.0';    // LOS E (log scaled)
                     customDensityFilter.style.display = 'none';
                     break;
                 case 'danger':
-                    state.minDensity = '0.6';
+                    state.minDensity = '1.0';    // LOS E (log scaled)
                     state.maxDensity = '';
                     customDensityFilter.style.display = 'none';
                     break;
@@ -264,6 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
         modalRawImage.src = '';
         modalAnnotatedImage.src = '';
         modalDensity.textContent = '-';
+        modalPersonCount.textContent = '-';
         modalVelocity.textContent = '-';
         modalAcceleration.textContent = '-';
 
@@ -285,6 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
         modalRawImage.src = data.rawImagePath || 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
         modalAnnotatedImage.src = data.annotatedImagePath || 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
         modalDensity.textContent = data.density?.toFixed(3) ?? '-';
+        modalPersonCount.textContent = data.personCount !== undefined ? `${data.personCount}명` : '-';
         modalVelocity.textContent = data.densityVelocity?.toFixed(3) ?? '-';
         modalAcceleration.textContent = data.densityAcceleration?.toFixed(3) ?? '-';
         renderDensityChart(data.surroundingHistory, data.timestamp);

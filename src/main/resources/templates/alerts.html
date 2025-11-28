@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout :: layout(~{::title}, ~{::section}, ~{::headResources})}">
+    th:replace="~{layout :: layout(~{::title}, ~{::section}, ~{::headResources})}">
+
 <head>
     <title>알림 이력 | E-N-C 캠퍼스 안전</title>
     <th:block th:fragment="headResources">
@@ -8,133 +9,153 @@
         <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ko.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@2.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+        <script
+            src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@2.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
         <link rel="stylesheet" th:href="@{/css/alerts.css}">
         <script defer th:src="@{/js/alerts.js}"></script>
     </th:block>
 </head>
+
 <body>
-<section class="alerts-page">
-    <div class="alerts-surface">
-        <header class="alerts-header">
-            <div class="alerts-header__meta">
-                <p class="breadcrumbs">관제 &gt; 알림 이력</p>
-                <h1 class="title">알림 이력 조회</h1>
-            </div>
-            <p class="subtitle">과거에 발생한 모든 위험/주의 알림을 확인하고 분석하세요.</p>
-        </header>
-
-        <div class="filter-bar">
-            <div class="filter-item">
-                <label for="dateRange">기간</label>
-                <input type="text" id="dateRange" placeholder="날짜 범위 선택">
-            </div>
-            <div class="filter-item">
-                <label for="levelFilter">등급</label>
-                <select id="levelFilter">
-                    <option value="all">전체</option>
-                    <option value="DANGER">위험</option>
-                    <option value="WARNING">주의</option>
-                    <option value="INFO">정보</option>
-                </select>
-            </div>
-            <div class="filter-item">
-                <label for="cameraFilter">카메라</label>
-                <select id="cameraFilter">
-                    <option value="all">모든 카메라</option>
-                </select>
-            </div>
-            <div class="filter-item filter-item--full-width">
-                <label>밀집도</label>
-                <div id="densityChipGroup" class="chip-group">
-                    <button class="chip is-active" data-preset="all">전체</button>
-                    <button class="chip" data-preset="caution">주의 (0.3 이상)</button>
-                    <button class="chip" data-preset="danger">위험 (0.6 이상)</button>
-                    <button class="chip" data-preset="custom">직접 입력</button>
+    <section class="alerts-page">
+        <div class="alerts-surface">
+            <header class="alerts-header">
+                <div class="alerts-header__meta">
+                    <p class="breadcrumbs">관제 &gt; 알림 이력</p>
+                    <h1 class="title">알림 이력 조회</h1>
                 </div>
-                <div id="customDensityFilter" class="custom-density-inputs" style="display: none;">
-                    <input type="number" id="minDensityFilter" step="0.1" min="0" placeholder="최소값" class="density-filter">
-                    <span>~</span>
-                    <input type="number" id="maxDensityFilter" step="0.1" min="0" placeholder="최대값" class="density-filter">
+            </header>
+
+            <div class="filter-bar">
+                <div class="filter-item">
+                    <label for="dateRange">기간</label>
+                    <input type="text" id="dateRange" placeholder="날짜 범위 선택">
+                </div>
+                <div class="filter-item">
+                    <label for="levelFilter">등급</label>
+                    <select id="levelFilter">
+                        <option value="all">전체</option>
+                        <option value="DANGER">위험</option>
+                        <option value="WARNING">주의</option>
+                        <option value="INFO">정보</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label for="cameraFilter">카메라</label>
+                    <select id="cameraFilter">
+                        <option value="all">모든 카메라</option>
+                    </select>
+                </div>
+                <div class="filter-item filter-item--full-width">
+                    <label>밀집도</label>
+                    <div id="densityChipGroup" class="chip-group">
+                        <button class="chip is-active" data-preset="all">전체</button>
+                        <button class="chip" data-preset="caution">주의 (0.3 이상)</button>
+                        <button class="chip" data-preset="danger">위험 (0.6 이상)</button>
+                        <button class="chip" data-preset="custom">직접 입력</button>
+                    </div>
+                    <div id="customDensityFilter" class="custom-density-inputs" style="display: none;">
+                        <input type="number" id="minDensityFilter" step="0.1" min="0" placeholder="최소값"
+                            class="density-filter">
+                        <span>~</span>
+                        <input type="number" id="maxDensityFilter" step="0.1" min="0" placeholder="최대값"
+                            class="density-filter">
+                    </div>
+                </div>
+                <div class="filter-item filter-item--search">
+                    <label for="searchFilter">검색</label>
+                    <input type="search" id="searchFilter" placeholder="카메라 이름, 알림 유형, 내용 등">
                 </div>
             </div>
-            <div class="filter-item filter-item--search">
-                <label for="searchFilter">검색</label>
-                <input type="search" id="searchFilter" placeholder="카메라 이름, 알림 유형, 내용 등">
+
+            <div class="table-container">
+                <table class="history-table" id="alertsTable">
+                    <thead>
+                        <tr>
+                            <th scope="col" data-sort="timestamp">발생 시각</th>
+                            <th scope="col" data-sort="cameraName">카메라 이름</th>
+                            <th scope="col" data-sort="density">밀집도</th>
+                            <th scope="col">알림 유형</th>
+                            <th scope="col">상세 내용</th>
+                            <th scope="col" data-sort="level">등급</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- JS에서 데이터 렌더링 -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination" id="pagination">
+                <!-- JS에서 페이지네이션 렌더링 -->
             </div>
         </div>
 
-        <div class="table-container">
-            <table class="history-table" id="alertsTable">
-                <thead>
-                <tr>
-                    <th scope="col" data-sort="timestamp">발생 시각</th>
-                    <th scope="col" data-sort="cameraName">카메라 이름</th>
-                    <th scope="col" data-sort="density">밀집도</th>
-                    <th scope="col">알림 유형</th>
-                    <th scope="col">상세 내용</th>
-                    <th scope="col" data-sort="level">등급</th>
-                </tr>
-                </thead>
-                <tbody>
-                <!-- JS에서 데이터 렌더링 -->
-                </tbody>
-            </table>
-        </div>
-
-        <div class="pagination" id="pagination">
-            <!-- JS에서 페이지네이션 렌더링 -->
-        </div>
-    </div>
-
-    <div id="alertDetailModal" class="modal-overlay" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modalTimestamp"></h2>
-                <button id="modalCloseButton" class="modal-close-button">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="modal-body__main">
-                    <div class="image-comparison">
-                        <figure>
+        <div id="alertDetailModal" class="modal-overlay" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="modalTimestamp"></h2>
+                    <button id="modalCloseButton" class="modal-close-button">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <!-- 1. Images Section -->
+                    <div class="modal-section modal-images-section">
+                        <figure class="image-container">
                             <figcaption>원본 스냅샷</figcaption>
-                            <img id="modalRawImage" src="" alt="원본 스냅샷">
+                            <div class="image-wrapper">
+                                <img id="modalRawImage" src="" alt="원본 스냅샷">
+                            </div>
                         </figure>
-                        <figure>
+                        <figure class="image-container">
                             <figcaption>분석 스냅샷</figcaption>
-                            <img id="modalAnnotatedImage" src="" alt="분석 스냅샷">
+                            <div class="image-wrapper">
+                                <img id="modalAnnotatedImage" src="" alt="분석 스냅샷">
+                            </div>
                         </figure>
                     </div>
-                    <div class="chart-container">
-                        <canvas id="modalDensityChart"></canvas>
+
+                    <!-- 2. Metrics Bar -->
+                    <div class="modal-section modal-metrics-bar">
+                        <div class="metric-card">
+                            <span class="metric-label">밀집도</span>
+                            <span id="modalDensity" class="metric-value">-</span>
+                        </div>
+                        <div class="metric-divider"></div>
+                        <div class="metric-card">
+                            <span class="metric-label">탐지 인원</span>
+                            <span id="modalPersonCount" class="metric-value">-</span>
+                        </div>
+                        <div class="metric-divider"></div>
+                        <div class="metric-card">
+                            <span class="metric-label">변화율(분)</span>
+                            <span id="modalVelocity" class="metric-value">-</span>
+                        </div>
+                        <div class="metric-divider"></div>
+                        <div class="metric-card">
+                            <span class="metric-label">가속도(분²)</span>
+                            <span id="modalAcceleration" class="metric-value">-</span>
+                        </div>
                     </div>
-                </div>
-                <div class="modal-body__sidebar">
-                    <h3>분석 정보</h3>
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <span class="info-label">밀집도</span>
-                            <span id="modalDensity" class="info-value"></span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">변화율(분)</span>
-                            <span id="modalVelocity" class="info-value"></span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">가속도(분²)</span>
-                            <span id="modalAcceleration" class="info-value"></span>
+
+                    <!-- 3. Chart Section -->
+                    <div class="modal-section modal-chart-section">
+                        <h3>밀집도 변화 추이</h3>
+                        <div class="chart-container">
+                            <canvas id="modalDensityChart"></canvas>
                         </div>
                     </div>
-                    <div id="modalLoading" class="loading-spinner" style="display: none;"></div>
+
+                    <div id="modalLoading" class="loading-overlay" style="display: none;">
+                        <div class="loading-spinner"></div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <script th:inline="javascript">
-        window.cameraData = /*[[${cameraListData}]]*/ [];
-    </script>
-</section>
+        <script th:inline="javascript">
+            window.cameraData = /*[[${cameraListData}]]*/[];
+        </script>
+    </section>
 </body>
-</html>
 
+</html>

@@ -21,6 +21,7 @@ body {
     color: var(--foreground);
     font-family: inherit;
     -webkit-font-smoothing: antialiased;
+    min-width: 1280px;
 }
 
 a {
@@ -142,25 +143,3 @@ button:focus-visible {
     width: 100%;
 }
 
-@media (max-width: 960px) {
-    .page-shell {
-        flex-direction: column;
-        gap: 2rem;
-        padding: 2.5rem clamp(1.25rem, 6vw, 2.5rem) 3rem;
-    }
-
-    .side-menu {
-        position: static;
-        min-width: 0;
-    }
-
-    .brand-block {
-        margin-bottom: 1rem;
-    }
-}
-
-@media (max-width: 600px) {
-    .page-shell {
-        padding: 2rem 1.5rem 2.5rem;
-    }
-}
