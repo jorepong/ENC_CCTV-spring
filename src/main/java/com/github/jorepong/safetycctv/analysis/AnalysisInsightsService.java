@@ -349,7 +349,6 @@ public class AnalysisInsightsService {
         if (camera == null) {
             return List.of();
         }
-        // Fetch only logs with READY status, up to 60, ordered by timestamp descending
         return analysisLogRepository.findTop60ByCameraIdAndAnalysisStatusOrderByTimestampDesc(
                 camera.getId(),
                 AnalysisStatus.READY);
@@ -360,11 +359,8 @@ public class AnalysisInsightsService {
             return List.of();
         }
         if (since == null) {
-            // If 'since' is null, defer to loadRecentLogs which already handles READY
-            // status
             return loadRecentLogs(camera);
         }
-        // Directly fetch READY logs since the specified time.
         return analysisLogRepository.findByCameraIdAndAnalysisStatusAndTimestampGreaterThanEqualOrderByTimestampDesc(
                 camera.getId(),
                 AnalysisStatus.READY,
@@ -644,25 +640,14 @@ public class AnalysisInsightsService {
         }
 
         LocalDateTime now = LocalDateTime.now();
-        // 1. Current Average (Window: +/- 7 mins)
         Double currentAvg = getAverageDensity(cameraId, now.minusMinutes(7), now.plusMinutes(7));
 
-        if (currentAvg == null) {
-            // If no current data, we can't calculate change rates.
-            // But we might still want to show past data?
-            // For now, let's return empty or partial data.
-            // Let's try to fetch past data anyway.
-        }
-
-        // 2. Yesterday Average (Window: +/- 7 mins)
         LocalDateTime yesterday = now.minusDays(1);
         Double yesterdayAvg = getAverageDensity(cameraId, yesterday.minusMinutes(7), yesterday.plusMinutes(7));
 
-        // 3. Last Week Average (Window: +/- 7 mins)
         LocalDateTime lastWeek = now.minusWeeks(1);
         Double lastWeekAvg = getAverageDensity(cameraId, lastWeek.minusMinutes(7), lastWeek.plusMinutes(7));
 
-        // 4. Calculate Changes
         Double yesterdayChange = calculateChange(currentAvg, yesterdayAvg);
         Double lastWeekChange = calculateChange(currentAvg, lastWeekAvg);
 
@@ -685,21 +670,6 @@ public class AnalysisInsightsService {
         if (current == null || past == null) {
             return null;
         }
-        // Change rate: (current - past) / past? Or just simple difference?
-        // The user request implied simple difference or ratio.
-        // Given density is 0.0 ~ 1.0+, simple difference is often more readable for
-        // "density".
-        // But for "percentage change", (current - past) / past is standard.
-        // However, if past is 0, division by zero occurs.
-        // Let's stick to simple difference (current - past) as it's safer and intuitive
-        // for density (e.g. +0.1 increase).
-        // Wait, the UI expects percentage?
-        // The UI code: const percent = (change * 100).toFixed(1);
-        // If change is 0.1 (difference), UI shows 10%. This implies simple difference.
-        // If density goes from 0.5 to 0.6, diff is 0.1. UI shows +10%. This is
-        // misleading if interpreted as growth rate (which is 20%).
-        // But for "density points", +10%p (percentage points) is often what is meant.
-        // Let's use simple difference.
         return current - past;
     }
 }

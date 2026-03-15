@@ -51,7 +51,6 @@ public class CameraService {
         cameraRepository.deleteById(cameraId);
     }
 
-    // New method to update training status
     @Transactional
     public void updateTrainingStatus(Long cameraId, TrainingStatus trainingStatus) {
         if (cameraId == null || trainingStatus == null) {

@@ -19,21 +19,8 @@ public interface AnalysisLogRepository extends JpaRepository<AnalysisLog, Long> 
 
     List<AnalysisLog> findByCameraIdAndTimestampAfterOrderByTimestampAsc(Long cameraId, LocalDateTime start);
 
-    /**
-     * Finds the most recent analysis log for a given camera ID.
-     *
-     * @param cameraId The ID of the camera.
-     * @return an Optional containing the most recent AnalysisLog, or an empty
-     *         Optional if none found.
-     */
     Optional<AnalysisLog> findFirstByCameraIdOrderByTimestampDesc(Long cameraId);
 
-    /**
-     * Returns the latest analysis logs (up to 60 entries) for the given camera.
-     *
-     * @param cameraId camera identifier
-     * @return ordered list (newest first) limited to at most 60 rows
-     */
     List<AnalysisLog> findTop60ByCameraIdOrderByTimestampDesc(Long cameraId);
 
     List<AnalysisLog> findTop60ByCameraIdAndTimestampGreaterThanEqualOrderByTimestampDesc(
@@ -64,10 +51,6 @@ public interface AnalysisLogRepository extends JpaRepository<AnalysisLog, Long> 
             @Param("dayOfWeek") int dayOfWeek,
             @Param("startHour") int startHour,
             @Param("endHour") int endHour);
-
-    // =================================================================================================================
-    // New methods for refactoring to use analysisStatus
-    // =================================================================================================================
 
     List<AnalysisLog> findByCameraIdAndAnalysisStatusAndTimestampBetweenOrderByTimestampAsc(
             Long cameraId,

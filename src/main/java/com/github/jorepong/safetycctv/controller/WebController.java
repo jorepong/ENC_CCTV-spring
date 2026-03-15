@@ -53,16 +53,13 @@ public class WebController {
             @RequestParam(value = "cameraId", required = false) Long cameraId,
         Model model
     ) {
-        // 1. Fetch all cameras once
         List<Camera> allCameras = cameraService.fetchAll();
 
-        // 2. Derive streaming cameras from the main list
         List<DashboardCameraView> streamingCameras = allCameras.stream()
             .map(DashboardCameraView::from)
             .flatMap(Optional::stream)
             .toList();
 
-        // 3. Find the primary camera to display
         DashboardCameraView primaryCamera = streamingCameras.stream()
             .filter(camera -> Objects.equals(camera.id(), cameraId))
             .findFirst()
@@ -71,17 +68,14 @@ public class WebController {
 
         log.info("[Dashboard] cameraId={}, total={}, streaming={}", cameraId, allCameras.size(), streamingCameras.size());
 
-        // 4. Summarize analytics into a Map for efficient lookup
         Map<Long, CameraAnalyticsSummary> analyticsSummaryMap =
             analysisInsightsService.summarizeCameras(allCameras);
 
-        // 5. Build the overall dashboard summary
         DashboardSummary baseSummary =
             analysisInsightsService.buildDashboardSummary(allCameras, streamingCameras, analyticsSummaryMap);
         DashboardSummary dashboardSummary = enrichSummaryWithAlerts(baseSummary);
         model.addAttribute("dashboardSummary", dashboardSummary);
 
-        // 6. Get analytics for the primary camera with an efficient O(1) lookup
         Optional<CameraAnalyticsSummary> primaryAnalyticsOpt = Optional.ofNullable(primaryCamera)
             .map(DashboardCameraView::id)
             .map(analyticsSummaryMap::get);
@@ -92,7 +86,6 @@ public class WebController {
             primaryAnalyticsOpt.map(CameraAnalyticsSummary::trainingStatus).map(Enum::name).orElse("NONE")
         );
 
-        // 7. Create sidebar camera list with analytics data
         List<DashboardSidebarCamera> sidebarCameras = allCameras.stream()
             .map(camera -> {
                 CameraAnalyticsSummary summary = analyticsSummaryMap.get(camera.getId());
@@ -111,7 +104,6 @@ public class WebController {
         model.addAttribute("sidebarCameras", sidebarCameras);
 
 
-        // 8. Add data to the model, using Optional to handle nulls gracefully
         model.addAttribute("streamingCameras", streamingCameras);
         model.addAttribute("primaryCamera", primaryCamera);
         model.addAttribute("primaryCameraAnalytics", primaryAnalyticsOpt.orElse(null));
@@ -125,7 +117,6 @@ public class WebController {
         );
         model.addAttribute("alertTrend", alertTrend);
 
-        // 9. Find and add the latest annotated image path
         primaryAnalyticsOpt.flatMap(summary ->
                 analysisLogRepository.findFirstByCameraIdOrderByTimestampDesc(summary.cameraId())
             )
@@ -136,7 +127,6 @@ public class WebController {
                 model.addAttribute("latestAnnotatedImagePath", webPath);
             });
 
-        // 10. Add next training time to the model
         LocalDateTime nextTrainingTime = trainingScheduleTracker.getNextTrainingTime();
         if (nextTrainingTime != null) {
             model.addAttribute("nextTrainingTime", nextTrainingTime);
@@ -161,11 +151,9 @@ public class WebController {
         @RequestParam(value = "cameraId", required = false) Long cameraId,
         Model model
     ) {
-        // 1. Fetch all cameras for the selector
         List<Camera> allCameras = cameraService.fetchAll();
         model.addAttribute("allCameras", allCameras);
 
-        // 2. Determine the selected camera
         Camera selectedCamera = allCameras.stream()
             .filter(c -> Objects.equals(c.getId(), cameraId))
             .findFirst()
@@ -177,7 +165,6 @@ public class WebController {
         }
         model.addAttribute("selectedCamera", selectedCamera);
 
-        // 3. Find the latest annotated image path for the selected camera
         analysisLogRepository.findFirstByCameraIdOrderByTimestampDesc(selectedCamera.getId())
             .map(AnalysisLog::getAnnotatedImagePath)
             .filter(path -> !path.isBlank())
@@ -186,7 +173,6 @@ public class WebController {
                 model.addAttribute("latestAnnotatedImagePath", webPath);
             });
 
-        // 4. Get analytics for the selected camera
         analysisInsightsService.summarizeCamera(selectedCamera)
             .ifPresent(summary -> model.addAttribute("cameraAnalytics", summary));
 
