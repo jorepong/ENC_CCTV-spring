@@ -43,4 +43,5 @@ out/
 ### VS Code ###
 .vscode/
 .env
+.claude/
 /Project_Explanation.md
